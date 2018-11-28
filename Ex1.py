@@ -102,6 +102,7 @@ class SVM:
     @staticmethod
     def evaluation(dataa, ecoc_mat, models, ok, filePath):
         y_list = []
+
         for x in dataa:
             vector = []
             i = 0
@@ -117,15 +118,11 @@ class SVM:
                 y_tag = models[i].algorithms[ok].method(ecoc_mat, vector)
                 i += 1
 
-                y_list.append(y_tag)
-
-        #acc = 1. * corr / len(dataa)
-        #print("Test {} : correct: {} incorrect: {} total: {}\n accuracy: {}".format( \
-        #    "hamming", corr, incorr, len(dataa), acc))
+                y_list.append(str(y_tag))
 
         # save results
-        with open('./pred/' + models[i].algorithms[ok].name, 'w+') as f:
-            f.write("\n".join(y_list))
+        with open('pred.txt', 'w+') as f:
+            f.write(" ".join(y_list))
 
     def get_pred_and_sign(self, x):
         pred = np.dot(x, self.W)
