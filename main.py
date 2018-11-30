@@ -20,12 +20,6 @@ def create_oa_matrix(size):
     return res
 
 
-def creating_ecoc_metrix(k):
-    col = int((k * k) * (k - 1) / 4)
-    result = np.zeros((k, col))
-    return result
-
-
 def get_list_of_pairs_combi(i):
     oppsiteClasses = [j for j in range(4) if j != i]
     return it.combinations(oppsiteClasses,2)
@@ -39,7 +33,7 @@ epoch = 10
 model_list = []
 
 data = svm.extract_data()
-ecoc_matrix = creating_ecoc_metrix(num_classes)
+ecoc_matrix = create_oa_matrix(num_classes)
 
 # training oa classes
 for x in range(num_classes):

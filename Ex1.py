@@ -6,7 +6,7 @@ from sklearn.utils import shuffle
 def extract_data():
     # read data
     mnist = fetch_mldata("MNIST original", data_home="./data")
-    eta = 0.1
+    #eta = 0.1
     X, Y = mnist.data[:60000] / 255., mnist.target[:60000]
     x = [ex for ex, ey in zip(X, Y) if ey in [0, 1, 2, 3]]
     y = [ey for ey in Y if ey in [0, 1, 2, 3]]
@@ -14,6 +14,16 @@ def extract_data():
     x, y = shuffle(x, y, random_state=1)
     return list(zip(x, y))
 
+def change_tags_all_pairs(y0, y1, data):
+    result = []
+    for x, y in data:
+        if(y == y0):
+            result.append((x, 1))
+        elif(y == y1):
+            result.append((x, -1))
+        else:
+            result.append((x, 0))
+    return result
 
 def change_tags(index, data):
     result = []
@@ -34,32 +44,37 @@ def hamming_distance_between_vectors(v1, v2):
     return sum
 
 def get_closest_vector_with_hamming_distance(matrix, out_vector):
-    rows = matrix.shape[0]
+
+    rows = len(matrix)
     # setting min to number of cols
-    min_distance = matrix.shape[1]
-    closest_vector = matrix[0]
+    min_distance = len(matrix[0])
+    min_index = 0
+    i = 0
     # iterate over rows of matrix
     for r in range(rows):
         curr_distance = hamming_distance_between_vectors(matrix[r], out_vector)
         if curr_distance < min_distance:
-            closest_vector = matrix[r]
+            min_index = i
             min_distance = curr_distance
-    return closest_vector
+        i = i + 1
+    return min_index
 
 
 # loss based distance
 def get_closest_vector_with_loss_based(matrix, out_vector):
-    rows = matrix.shape[0]
-    closest_vector = matrix[0]
+    rows = len(matrix)
     # setting min to number of cols
-    min_distance = matrix.shape[1]
+    min_distance = len(matrix[0])
     #iterate over rows of matrix
+    min_index = 0
+    i = 0
     for r in range(rows):
         curr_distance = loss_based_between_vectors(matrix[r], out_vector)
         if curr_distance < min_distance:
-            closest_vector = matrix[r]
             min_distance = curr_distance
-    return closest_vector
+            min_index = i
+        i = i + 1
+    return min_index
 
 
 def loss_based_between_vectors(v1, v2):
@@ -97,7 +112,7 @@ class SVM:
                 else:
                     self.W -= reg
                 loss += pred[0]
-            print loss
+            #print loss
 
     @staticmethod
     def evaluation(dataa, ecoc_mat, models, ok, filePath):
@@ -108,7 +123,7 @@ class SVM:
             i = 0
             for model in models:
 
-                y_pred, pred = models[0].get_pred_and_sign(x)
+                y_pred, pred = models[i].get_pred_and_sign(x)
 
                 if models[i].algorithms[ok].name is "Loss":
                     vector.append(pred)
@@ -121,7 +136,7 @@ class SVM:
                 y_list.append(str(y_tag))
 
         # save results
-        with open('pred.txt', 'w+') as f:
+        with open(''.join(filePath), 'w+') as f:
             f.write(" ".join(y_list))
 
     def get_pred_and_sign(self, x):
