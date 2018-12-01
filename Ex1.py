@@ -6,13 +6,13 @@ from sklearn.utils import shuffle
 def extract_data():
     # read data
     mnist = fetch_mldata("MNIST original", data_home="./data")
-    #eta = 0.1
     X, Y = mnist.data[:60000] / 255., mnist.target[:60000]
     x = [ex for ex, ey in zip(X, Y) if ey in [0, 1, 2, 3]]
     y = [ey for ey in Y if ey in [0, 1, 2, 3]]
     # suffle examples
     x, y = shuffle(x, y, random_state=1)
     return list(zip(x, y))
+
 
 def change_tags_all_pairs(y0, y1, data):
     result = []
@@ -25,6 +25,7 @@ def change_tags_all_pairs(y0, y1, data):
             result.append((x, 0))
     return result
 
+
 def change_tags(index, data):
     result = []
     for x, y in data:
@@ -32,10 +33,10 @@ def change_tags(index, data):
             result.append((x, 1))
         else:
             result.append((x, -1))
-
     return result
 
-# hamming distance
+
+# hamming distance helper
 def hamming_distance_between_vectors(v1, v2):
     """Count the # of differences between equal length strings str1 and str2"""
     sum = 0
@@ -43,8 +44,8 @@ def hamming_distance_between_vectors(v1, v2):
         sum += (1 - np.sign(ch1 * ch2))/2
     return sum
 
-def get_closest_vector_with_hamming_distance(matrix, out_vector):
 
+def get_closest_vector_with_hamming_distance(matrix, out_vector):
     rows = len(matrix)
     # setting min to number of cols
     min_distance = len(matrix[0])
@@ -77,6 +78,7 @@ def get_closest_vector_with_loss_based(matrix, out_vector):
     return min_index
 
 
+# loss based helper
 def loss_based_between_vectors(v1, v2):
     total = 0
     for c1, c2 in zip(v1, v2):
@@ -85,7 +87,8 @@ def loss_based_between_vectors(v1, v2):
         total += curr
     return total
 
-# svm section
+
+# -----svm section----- #
 class SVM:
 
     def __init__(self, lamda, weight, lrn, epoch):
@@ -93,8 +96,8 @@ class SVM:
         self.W = weight
         self.lrn = lrn
         self.ep = epoch
-        self.algorithms = {0:Algorithem('Loss', get_closest_vector_with_loss_based),
-                           1:Algorithem('Hamming', get_closest_vector_with_hamming_distance)}
+        self.algorithms = {0:Algorithm('Loss', get_closest_vector_with_loss_based),
+                           1:Algorithm('Hamming', get_closest_vector_with_hamming_distance)}
 
     def train(self, train_data):
         #lrn = self.lrn * (1 / self.ep)
@@ -115,12 +118,14 @@ class SVM:
             #print loss
 
     @staticmethod
-    def evaluation(dataa, ecoc_mat, models, ok, filePath):
+    def evaluation(dataa, ecoc_mat, models, ok, filePath, string):
         y_list = []
 
         for x in dataa:
             vector = []
             i = 0
+            correct = 0
+            incorrect = 0
             for model in models:
 
                 y_pred, pred = models[i].get_pred_and_sign(x)
@@ -135,6 +140,15 @@ class SVM:
 
                 y_list.append(str(y_tag))
 
+                if (y_tag == y_pred):
+                    correct += 1
+                else:
+                    incorrect += 1
+
+            acc = 1. * correct / len(dataa)
+            print("test {} : correct: {} incorrect: {} total: {}\n accuracy: {}".format( \
+                string, correct, incorrect, len(dataa), acc))
+
         # save results
         with open(''.join(filePath), 'w+') as f:
             f.write(" ".join(y_list))
@@ -145,7 +159,7 @@ class SVM:
         return y_sign, pred
 
 
-class Algorithem:
+class Algorithm:
     def __init__(self, name, method):
         self.name = name
         self.method = method
