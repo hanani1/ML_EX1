@@ -3,6 +3,7 @@ from sklearn.datasets import fetch_mldata
 from sklearn.utils import shuffle
 
 
+#-------------------------- extracting data----------------------------#
 def extract_data():
     # read data
     mnist = fetch_mldata("MNIST original", data_home="./data")
@@ -12,6 +13,27 @@ def extract_data():
     # suffle examples
     x, y = shuffle(x, y, random_state=1)
     return list(zip(x, y))
+
+
+def load_evaluation_data():
+    dset = np.loadtxt('./x_test.txt')
+    labels = np.loadtxt('./y_test.txt')
+    devset = []
+
+    for x in dset:
+        devset.append(np.reshape(x, (1, 784)))
+
+    return list(zip(devset, labels))
+
+
+def load_test_data():
+    tset = np.loadtxt('./x4pred.txt')
+    testset = []
+
+    for x in tset:
+        testset.append(x.reshape((1, 784)))
+
+    return testset
 
 
 def change_tags_all_pairs(y0, y1, data):
@@ -26,7 +48,7 @@ def change_tags_all_pairs(y0, y1, data):
     return result
 
 
-def change_tags(index, data):
+def change_tags_ova(index, data):
     result = []
     for x, y in data:
         if y == index:
@@ -88,6 +110,51 @@ def loss_based_between_vectors(v1, v2):
     return total
 
 
+def create_pred_vector(models, x, string):
+    output_vector = [] # hamming distance
+    pred_vector = [] # loss distance
+    for model in models:
+        y_tag, pred = model.get_pred_and_sign(x)
+        pred_vector.append(pred)
+        output_vector.append(y_tag)
+
+    if "hamming" in string:
+        return output_vector
+    else:
+        return pred_vector
+
+
+# evaluating the dev set
+def evaluate_dev(data, ecoc_mat, models, loss_function, string):
+    y_pred =[]
+    correct = 0
+    incorrect = 0
+    for x, y in data:
+        prediction_vector = create_pred_vector(models, x, string)
+        y_tag = loss_function(ecoc_mat, prediction_vector)
+        if y_tag == y:
+            correct = correct + 1
+        else:
+            incorrect = incorrect + 1
+
+    accuracy = (correct * 100 * 1.0)/(len(data) * 1.0)
+
+    print("Accuracy of " + string + ": " + str(accuracy))
+
+
+def predict_results(dataa, ecoc_mat, models,filePath, string, loss_function):
+    y_list = []
+
+    for x in dataa:
+        prediction_vector = create_pred_vector(models, x, string)
+        y_tag = loss_function(ecoc_mat, prediction_vector)
+        y_list.append(str(y_tag))
+    # save results
+
+    with open(filePath, 'w+') as f:
+        f.write("\n".join(y_list))
+
+
 # -----svm section----- #
 class SVM:
 
@@ -116,42 +183,6 @@ class SVM:
                     self.W -= reg
                 loss += pred[0]
             #print loss
-
-    @staticmethod
-    def evaluation(dataa, ecoc_mat, models, ok, filePath, string):
-        y_list = []
-
-        for x in dataa:
-            vector = []
-            i = 0
-            correct = 0
-            incorrect = 0
-            for model in models:
-
-                y_pred, pred = models[i].get_pred_and_sign(x)
-
-                if models[i].algorithms[ok].name is "Loss":
-                    vector.append(pred)
-                else:
-                    vector.append(y_pred)
-
-                y_tag = models[i].algorithms[ok].method(ecoc_mat, vector)
-                i += 1
-
-                y_list.append(str(y_tag))
-
-                if (y_tag == y_pred):
-                    correct += 1
-                else:
-                    incorrect += 1
-
-            acc = 1. * correct / len(dataa)
-            print("test {} : correct: {} incorrect: {} total: {}\n accuracy: {}".format( \
-                string, correct, incorrect, len(dataa), acc))
-
-        # save results
-        with open(''.join(filePath), 'w+') as f:
-            f.write(" ".join(y_list))
 
     def get_pred_and_sign(self, x):
         pred = np.dot(x, self.W)

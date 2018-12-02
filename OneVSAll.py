@@ -3,15 +3,6 @@ import itertools as it
 import Ex1 as svm
 
 
-# load data
-def load_test_data():
-    tset = np.loadtxt('x_test.txt')
-    testset = []
-    for x in tset:
-        testset.append(np.reshape(x, (1, 784)))
-    return testset
-
-
 # oa creation helper
 def create_oa_matrix(size):
     res = []
@@ -40,17 +31,20 @@ data = svm.extract_data()
 ecoc_matrix = create_oa_matrix(num_classes)
 
 # -----training section----- #
-for x in range(num_classes):
-        new_data = svm.change_tags(x, data)
+for i in range(num_classes):
+        new_data = svm.change_tags_ova(i, data)
         W = np.zeros((dim, 1))
         model = svm.SVM(lamdaa, W, lrn, epoch)
         model.train(new_data)
         model_list.append(model)
-        print("finished with #{} model".format(x))
-oa_matrix = create_oa_matrix(num_classes)
+        print("finished with #{} model".format(i))
 
+# evaluation of dev
+dev_data = svm.load_evaluation_data()
+svm.evaluate_dev(dev_data, ecoc_matrix, model_list, svm.get_closest_vector_with_hamming_distance, "ova with hamming")
+svm.evaluate_dev(dev_data, ecoc_matrix, model_list, svm.get_closest_vector_with_loss_based, "ova with loss")
 
-# -----testing section----- #
-test_data = load_test_data()
-svm.SVM.evaluation(test_data, ecoc_matrix, model_list, 1, 'test.onevall.ham.pred', "hamming") # write hamming func
-svm.SVM.evaluation(test_data, ecoc_matrix, model_list, 0, 'test.onevall.loss.pred', "loss") # write loss func
+# predictions
+test_data = svm.load_test_data()
+svm.predict_results(test_data, ecoc_matrix, model_list, 'test.onevall.ham.pred', "hamming", svm.get_closest_vector_with_hamming_distance) # write hamming func
+svm.predict_results(test_data, ecoc_matrix, model_list, 'test.onevall.loss.pred', "loss", svm.get_closest_vector_with_loss_based) # write loss func
