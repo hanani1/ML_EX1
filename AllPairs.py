@@ -13,6 +13,17 @@ def update_ecoc(ecoc_matrix, classifier, y0, y1):
     ecoc_matrix[y0, classifier] = 1
     ecoc_matrix[y1, classifier] = -1
 
+def change_tags_all_pairs(y0, y1, data):
+    result = []
+    for x, y in data:
+        if(y == y0):
+            result.append((x, 1))
+        elif(y == y1):
+            result.append((x, -1))
+        else:
+            result.append((x, 0))
+    return result
+
 
 # main #
 num_classes = 4
@@ -32,7 +43,7 @@ pair = 0
 for y0, y1 in (it.combinations(range(num_classes), 2)):
     update_ecoc(ecoc_matrix, pair, y0, y1)
     pair = pair + 1
-    new_data = svm.change_tags_all_pairs(y0, y1, data)
+    new_data = change_tags_all_pairs(y0, y1, data)
     W = np.zeros((dim, 1))
     model = svm.SVM(lamdaa, W, lrn, epoch)
     model.train(new_data)

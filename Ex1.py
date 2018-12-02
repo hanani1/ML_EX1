@@ -35,29 +35,7 @@ def load_test_data():
 
     return testset
 
-
-def change_tags_all_pairs(y0, y1, data):
-    result = []
-    for x, y in data:
-        if(y == y0):
-            result.append((x, 1))
-        elif(y == y1):
-            result.append((x, -1))
-        else:
-            result.append((x, 0))
-    return result
-
-
-def change_tags_ova(index, data):
-    result = []
-    for x, y in data:
-        if y == index:
-            result.append((x, 1))
-        else:
-            result.append((x, -1))
-    return result
-
-
+# --------------------------------------distance functions--------------------------#
 # hamming distance helper
 def hamming_distance_between_vectors(v1, v2):
     """Count the # of differences between equal length strings str1 and str2"""
@@ -109,7 +87,7 @@ def loss_based_between_vectors(v1, v2):
         total += curr
     return total
 
-
+#--------------------------------------------predictions-------------------------#
 def create_pred_vector(models, x, string):
     output_vector = [] # hamming distance
     pred_vector = [] # loss distance

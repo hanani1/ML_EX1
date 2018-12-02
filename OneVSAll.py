@@ -12,10 +12,14 @@ def create_oa_matrix(size):
         res.append(curr)
     return res
 
-# return the combination of classes
-def get_list_of_pairs_combi(i):
-    oppsiteClasses = [j for j in range(4) if j != i]
-    return it.combinations(oppsiteClasses,2)
+def change_tags_ova(index, data):
+    result = []
+    for x, y in data:
+        if y == index:
+            result.append((x, 1))
+        else:
+            result.append((x, -1))
+    return result
 
 
 # -----main----- #
@@ -32,7 +36,7 @@ ecoc_matrix = create_oa_matrix(num_classes)
 
 # -----training section----- #
 for i in range(num_classes):
-        new_data = svm.change_tags_ova(i, data)
+        new_data = change_tags_ova(i, data)
         W = np.zeros((dim, 1))
         model = svm.SVM(lamdaa, W, lrn, epoch)
         model.train(new_data)
