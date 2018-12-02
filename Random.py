@@ -5,13 +5,13 @@ import Ex1 as svm
 
 def create_random_matrix():
     matrix = []
-    first_row = {1, 0, 0, 0, 1, -1, 1, -1, 1}
+    first_row = [1, 0, 0, 0, 1, -1, 1, -1, 1]
     matrix.append(first_row)
-    second_row = {0, 1, -1, 1, -1, -1, -1, 1, 1}
+    second_row = [0, 1, -1, 1, -1, -1, -1, 1, 1]
     matrix.append(second_row)
-    third_row = {-1 ,-1, 1, 1, -1, -1, 1, -1, -1}
+    third_row = [-1 ,-1, 1, 1, -1, -1, 1, -1, -1]
     matrix.append(third_row)
-    fourth_row = {0, 1, 0, -1, -1, 1, -1, -1, 1}
+    fourth_row = [0, 1, 0, -1, -1, 1, -1, -1, 1]
     matrix.append(fourth_row)
     return matrix
 
@@ -145,7 +145,7 @@ def change_data_for_random_9(data):
 lamdaa = 0.1
 lrn = 0.05
 dim = 784
-epoch = 20
+epoch = 10
 model_list = []
 
 data = svm.extract_data()
